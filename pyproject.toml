@@ -1,0 +1,59 @@
+[tool.poetry]
+name = "saigoblog"
+version = "0.1.0"
+description = "Simple personal website built on top of React and Fastapi"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.78.0"
+SQLAlchemy = "^1.4.39"
+uvicorn = "^0.18.2"
+uvloop = "^0.16.0"
+alembic = "^1.8.0"
+asyncpg = "^0.26.0"
+email-validator = "^1.2.1"
+python-multipart = "^0.0.5"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+types-passlib = "^1.7.7"
+pytest = "^7.1.3"
+httpx = "^0.23.0"
+
+[tool.poetry.dev-dependencies]
+flake8-bugbear = "^22.7.1"
+flake8-builtins = "^1.5.3"
+flake8-commas = "^2.1.0"
+flake8-comprehensions = "^3.10.0"
+flake8-eradicate = "^1.2.1"
+flake8-import-order = "^0.18.1"
+flake8-print = "^5.0.0"
+mypy-extensions = "^0.4.3"
+pycodestyle = "^2.8.0"
+flake8-logging-format = "^0.6.0"
+sqlalchemy2-stubs = "^0.0.2-alpha.24"
+mypy = "^0.961"
+black = "^22.6.0"
+pytest-cov = "^4.0.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+filterwarnings = "error"
+addopts = '''
+  --strict-markers
+  --tb=short
+  --cov=app
+  --cov-report=term-missing
+  --cov-report=html
+  --cov-report=xml:coverage.xml
+  --no-cov-on-fail
+  --cov-fail-under=100
+'''
