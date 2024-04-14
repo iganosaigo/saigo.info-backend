@@ -1,18 +1,19 @@
 [tool.poetry]
-name = "saigoblog"
-version = "0.1.0"
+name = "saigoblog-backend"
+version = "0.1.1"
 description = "Simple personal website built on top of React and Fastapi"
-authors = ["Your Name <you@example.com>"]
+authors = ["IganoSaigo <an.grigoriev84@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-fastapi = "^0.78.0"
-SQLAlchemy = "^1.4.39"
-uvicorn = "^0.18.2"
-uvloop = "^0.16.0"
-alembic = "^1.8.0"
-asyncpg = "^0.26.0"
+python = "^3.12"
+fastapi = "^0.110.1"
+pydantic = "^1.9.1"
+SQLAlchemy = "^1.4.52"
+uvicorn = "^0.29.0"
+uvloop = "^0.19.0"
+alembic = "^1.13.1"
+asyncpg = "^0.29.0"
 email-validator = "^1.2.1"
 python-multipart = "^0.0.5"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
@@ -46,7 +47,10 @@ exclude_dirs = [".venv", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = "tests"
-filterwarnings = "error"
+filterwarnings = [
+  "error",
+  "ignore::DeprecationWarning"
+  ]
 addopts = '''
   --strict-markers
   --tb=short
