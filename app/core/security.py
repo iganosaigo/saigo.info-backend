@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
 from app.core.config import settings
@@ -12,8 +12,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def create_access_token(subject: str) -> str:
     jwt_claims = {
         "iss": str(settings.SERVER_HOST),
-        "iat": datetime.utcnow(),
-        "exp": datetime.utcnow() + timedelta(minutes=settings.JWT_EXPIRE_MINUTES),
+        "iat": datetime.now(timezone.utc),
+        "exp": datetime.now(timezone.utc)
+        + timedelta(minutes=settings.JWT_EXPIRE_MINUTES),
         "sub": subject,
     }
 
