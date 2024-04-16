@@ -1,12 +1,11 @@
-from time import sleep, time
-from typing import Any, AsyncGenerator, Dict
+from typing import AsyncGenerator, Dict
 
 from app import crud, schemas
 from app.core.config import get_settings
 from app.db.meta import Base
 from app.db.session import get_db_session
-from app.main import app
-from httpx import AsyncClient
+from app.main import app as fastapi_app
+from httpx import AsyncClient, ASGITransport
 from pydantic import SecretStr
 import pytest
 from sqlalchemy import text
@@ -32,7 +31,7 @@ async def override_get_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-app.dependency_overrides[get_db_session] = override_get_db_session
+fastapi_app.dependency_overrides[get_db_session] = override_get_db_session
 
 
 @pytest.fixture
@@ -61,7 +60,7 @@ async def start_db():
 @pytest.fixture
 async def client() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(
-        app=app,
+        transport=ASGITransport(app=fastapi_app),
         base_url=fastapi_uri,
         # headers={"Content-Type": "application/json"},
     ) as client:
