@@ -1,3 +1,4 @@
+from time import sleep, time
 from typing import Any, AsyncGenerator, Dict
 
 from app import crud, schemas
@@ -6,7 +7,7 @@ from app.db.meta import Base
 from app.db.session import get_db_session
 from app.main import app
 from httpx import AsyncClient
-from pydantic import EmailStr, SecretStr
+from pydantic import SecretStr
 import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -14,7 +15,7 @@ from sqlalchemy.orm import sessionmaker
 
 settings = get_settings("test")
 fastapi_uri = f"{settings.SERVER_HOST}:{settings.SERVER_PORT}{settings.API_URL}"
-pg_uri = settings.PG_URI
+pg_uri = str(settings.PG_URI)
 
 engine = create_async_engine(pg_uri, echo=False)
 
@@ -72,7 +73,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 @pytest.fixture
 def admin_data() -> schemas.UserToDB:
     return schemas.UserToDB(
-        email=EmailStr("test-admin@example.com"),
+        email="test-admin@example.com",
         fullname="test-admin",
         disabled=False,
         role_id=1,

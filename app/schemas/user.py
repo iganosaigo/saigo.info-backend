@@ -1,7 +1,15 @@
 from typing import Optional
 
 from app.core.security import get_password_hash
-from pydantic import BaseModel, EmailStr, Field, SecretStr, validator
+from pydantic import (
+    ConfigDict,
+    BaseModel,
+    EmailStr,
+    Field,
+    SecretStr,
+    ValidationInfo,
+    field_validator,
+)
 
 from . import types
 
@@ -18,6 +26,7 @@ def check_email_len(email: str) -> str:
 
 # ----> DB's schemas
 
+
 # Get full info about user from DB with relations
 class UserFromDB(BaseModel):
     id: int
@@ -31,20 +40,22 @@ class UserFromDB(BaseModel):
 
 # Put user to DB
 class UserToDB(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
     email: EmailStr
     fullname: str
     disabled: bool
     role_id: int
     password: Optional[SecretStr] = Field(None, exclude=True)
-    hashed_password: Optional[str] = None
+    hashed_password: Optional[str] = Field(None, validate_default=True)
 
-    # Provide hash or it'll make it from plain password
-    @validator("hashed_password", pre=True, always=True)
-    def make_hashed_password(cls, hash, values):
-        if hash:
+    @field_validator("hashed_password", mode="after")
+    @classmethod
+    def make_hashed_password(cls, v: str, info: ValidationInfo) -> str | None:
+        if v:
             raise ValueError("You cant supply hash by yourself!")
 
-        password = values["password"]
+        password = info.data["password"]
         if password:
             return get_password_hash(password.get_secret_value())
 
@@ -58,15 +69,11 @@ class UserAuth(BaseModel):
 
 # ----> HTTP Responses schemas
 
+
 # Additional properties to return via API
 class UserResponse(UserFromDB):
-    pass
-
-    class Config:
-        fields = {
-            "hashed_password": {"exclude": True},
-            "role_id": {"exclude": True},
-        }
+    hashed_password: str = Field(exclude=True)
+    role_id: int = Field(exclude=True)
 
 
 # ----> HTTP Requests schemas
@@ -79,7 +86,7 @@ class CreateUserRequest(BaseModel):
     role_name: str
     disabled: bool
 
-    _email_ = validator("email", allow_reuse=True)(check_email_len)
+    _email_validation = field_validator("email")(check_email_len)
 
 
 class UpdateUserRequest(CreateUserRequest):

@@ -26,8 +26,9 @@ async def login_access_token(
     elif user.disabled:
         raise exceptions.DisabledUser
 
+    token = security.create_access_token(user.email)
     result = {
-        "access_token": security.create_access_token(user.email),
+        "access_token": token,
         "token_type": "bearer",
     }
     return result

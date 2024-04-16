@@ -56,13 +56,8 @@ class TagsResponse(BaseModel):
 
 
 class PostResponse(PostFromDB):
-    pass
-
-    class Config:
-        fields = {
-            "writer_id": {"exclude": True},
-            "id": {"exclude": True},
-        }
+    writer_id: int = Field(exclude=True)
+    id: int = Field(exclude=True)
 
 
 class PageResponse(BaseModel):

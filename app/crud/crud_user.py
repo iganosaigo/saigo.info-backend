@@ -53,7 +53,7 @@ class CRUDUser(CRUDBase[Account]):
 
         user_in_db = (await db.execute(stmt)).one_or_none()
         if user_in_db:
-            return schemas.UserFromDB.construct(**user_in_db._mapping)
+            return schemas.UserFromDB.model_construct(**user_in_db._mapping)
 
         return None
 
@@ -85,7 +85,7 @@ class CRUDUser(CRUDBase[Account]):
     ) -> List[schemas.UserFromDB]:
         stmt = user_common_select.order_by(Account.id)
         rows = (await db.execute(stmt)).all()
-        users = [schemas.UserFromDB.construct(**row._mapping) for row in rows]
+        users = [schemas.UserFromDB.model_construct(**row._mapping) for row in rows]
         return users
 
     async def create(
@@ -94,7 +94,7 @@ class CRUDUser(CRUDBase[Account]):
         *,
         obj_in: schemas.UserToDB,
     ) -> schemas.UserFromDB:
-        new_user = Account(**obj_in.dict())
+        new_user = Account(**obj_in.model_dump())
 
         db.add(new_user)
         await db.commit()
@@ -119,7 +119,7 @@ class CRUDUser(CRUDBase[Account]):
         stmt = (
             update(self.model)
             .where(self.model.email == db_obj.email)
-            .values(**obj_in.dict(exclude_none=True))
+            .values(**obj_in.model_dump(exclude_none=True))
             # .returning(self.model)
             # OR
             # .execution_options(synchronize_session="fetch")

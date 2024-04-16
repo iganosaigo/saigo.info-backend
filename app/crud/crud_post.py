@@ -111,7 +111,7 @@ class CRUDPost(CRUDBase[Post]):
         new_post = Post(
             account_id=user_id,
             post_id=obj_in.post_id,
-            post_json=obj_in.dict(
+            post_json=obj_in.model_dump(
                 exclude={"post_id"},
             ),
         )
@@ -130,7 +130,7 @@ class CRUDPost(CRUDBase[Post]):
         stmt = select(self.model).filter_by(post_id=post_id)
         post_in_db = cast(Post, (await db.execute(stmt)).scalar_one_or_none())
         new_post_data = post_in_db.post_json.copy()
-        new_post_data.update(obj_in.dict())
+        new_post_data.update(obj_in.model_dump())
 
         update_stmt = (
             update(self.model)

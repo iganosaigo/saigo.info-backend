@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 engine = create_async_engine(
-    settings.PG_URI,
-    **PgConnectParams().dict(),
+    str(settings.PG_URI),
+    **PgConnectParams().model_dump(),
 )
 
 SessionLocal = sessionmaker(

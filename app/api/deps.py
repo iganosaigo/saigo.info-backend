@@ -5,7 +5,7 @@ from app.core.security import verify_access_token
 from app.db.session import get_db_session
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
+from jose.exceptions import ExpiredSignatureError, JWTError
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,10 +24,10 @@ async def verify_user_token(
         user = await crud.user.get_user(db, email=token_data.sub)
         assert user
 
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise exceptions.TokenExpired
 
-    except (jwt.JWTError, ValidationError, AssertionError):
+    except (JWTError, ValidationError, AssertionError):
         raise exceptions.InvalidCredentials
 
     return user

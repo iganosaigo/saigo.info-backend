@@ -60,7 +60,7 @@ async def create_user(
     if not role_id:
         raise exceptions.RoleInvalid
 
-    new_user = schemas.UserToDB(**body.dict(), role_id=role_id)
+    new_user = schemas.UserToDB(**body.model_dump(), role_id=role_id)
 
     result = await crud.user.create(db, obj_in=new_user)
     return result
@@ -144,7 +144,7 @@ async def update_specific_user(
         role_id = user_in_db.role_id
 
     opts.update({"role_id": role_id})
-    updated_user = schemas.UserToDB(**body.dict(), **opts)
+    updated_user = schemas.UserToDB(**body.model_dump(), **opts)
 
     result = await crud.user.update_user(
         db,

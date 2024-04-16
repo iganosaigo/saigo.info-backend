@@ -110,7 +110,7 @@ async def update_post(
         ),
     ),
 ) -> Any:
-    update_post = schemas.UpdatePostInDB.construct(**body.dict())
+    update_post = schemas.UpdatePostInDB.model_construct(**body.model_dump())
 
     result = await crud.post.update_post(
         db,
@@ -133,7 +133,7 @@ async def create_post(
         deps.AuthCheck(isadmin=True, isdisabled=True),
     ),
 ) -> Any:
-    new_post = schemas.CreatePostInDB(**body.dict())
+    new_post = schemas.CreatePostInDB(**body.model_dump())
 
     result = await crud.post.create_post(
         db,
