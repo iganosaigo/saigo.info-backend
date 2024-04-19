@@ -66,3 +66,6 @@ addopts = '''
   --no-cov-on-fail
   --cov-fail-under=90
 '''
+
+[tool.pyright]
+reportIncompatibleVariableOverride = false
