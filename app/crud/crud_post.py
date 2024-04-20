@@ -117,6 +117,7 @@ class CRUDPost(CRUDBase[Post]):
         )
         db.add(new_post)
         await db.commit()
+        await db.refresh(new_post)
 
         return new_post.post_id
 
