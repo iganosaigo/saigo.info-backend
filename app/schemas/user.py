@@ -24,56 +24,16 @@ def check_email_len(email: str) -> str:
     return email.lower()
 
 
-# ----> DB's schemas
+# ----> HTTP Responses schemas
 
 
-# Get full info about user from DB with relations
-class UserFromDB(BaseModel):
+# Additional properties to return via API
+class UserResponse(BaseModel):
     id: int
     email: EmailStr
     fullname: str
     disabled: bool
     role_name: str
-    role_id: int
-    hashed_password: str
-
-
-# Put user to DB
-class UserToDB(BaseModel):
-    model_config = ConfigDict(validate_assignment=True)
-
-    email: EmailStr
-    fullname: str
-    disabled: bool
-    role_id: int
-    password: Optional[SecretStr] = Field(None, exclude=True)
-    hashed_password: Optional[str] = Field(None, validate_default=True)
-
-    @field_validator("hashed_password", mode="after")
-    @classmethod
-    def make_hashed_password(cls, v: str, info: ValidationInfo) -> str | None:
-        if v:
-            raise ValueError("You cant supply hash by yourself!")
-
-        password = info.data["password"]
-        if password:
-            return get_password_hash(password.get_secret_value())
-
-        return None
-
-
-class UserAuth(BaseModel):
-    disabled: bool
-    email: EmailStr
-
-
-# ----> HTTP Responses schemas
-
-
-# Additional properties to return via API
-class UserResponse(UserFromDB):
-    hashed_password: str = Field(exclude=True)
-    role_id: int = Field(exclude=True)
 
 
 # ----> HTTP Requests schemas
@@ -105,3 +65,41 @@ class ChangeMePasswordRequest(ChangeUserPasswordRequest):
 
 class DisableUserRequest(BaseModel):
     disabled: bool
+
+
+# ----> DB's schemas
+
+
+# Get full info about user from DB with relations
+class UserFromDB(UserResponse):
+    role_id: int
+    hashed_password: str
+
+
+# Put user to DB
+class UserToDB(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
+    email: EmailStr
+    fullname: str
+    disabled: bool
+    role_id: int
+    password: Optional[SecretStr] = Field(None, exclude=True)
+    hashed_password: Optional[str] = Field(None, validate_default=True)
+
+    @field_validator("hashed_password", mode="after")
+    @classmethod
+    def make_hashed_password(cls, v: str, info: ValidationInfo) -> str | None:
+        if v:
+            raise ValueError("You cant supply hash by yourself!")
+
+        password = info.data["password"]
+        if password:
+            return get_password_hash(password.get_secret_value())
+
+        return None
+
+
+class UserAuth(BaseModel):
+    disabled: bool
+    email: EmailStr
