@@ -1,13 +1,12 @@
 import pytest
 
-from app import crud, schemas
+from app import schemas
 from app.api.endpoints.user import get_user_helper
 from app.core import exceptions
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests import utils
-from typing import AsyncGenerator
 
 pytestmark = pytest.mark.anyio
 
@@ -16,6 +15,7 @@ class TestUser:
 
     async def test_get_user_helper(
         self,
+        prepare_db: None,
         create_admin: None,
         get_session: AsyncSession,
         user_data_expected: utils.Users,

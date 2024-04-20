@@ -6,9 +6,7 @@ from app.db.meta import Base
 from app.db.session import get_db_session
 from app.main import app as fastapi_app
 from tests import utils
-from dataclasses import asdict, dataclass
 from httpx import AsyncClient, ASGITransport
-from pydantic import SecretStr
 import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -49,7 +47,8 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def start_db():
+@pytest.fixture
+async def prepare_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
@@ -62,13 +61,12 @@ async def start_db():
 
 
 @pytest.fixture
-async def client() -> AsyncGenerator[AsyncClient, None]:
+async def client(prepare_db: None) -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(
         transport=ASGITransport(app=fastapi_app),
         base_url=fastapi_uri,
         # headers={"Content-Type": "application/json"},
     ) as client:
-        await start_db()
         yield client
         await engine.dispose()
 
@@ -191,14 +189,60 @@ async def admin_jwt(
 
 
 @pytest.fixture
+async def other_users_jwt(
+    create_other_users: None,
+    other_users_data: list[schemas.UserToDB],
+    client: AsyncClient,
+) -> dict[str, str]:
+    result = {}
+    for user in other_users_data:
+        if not user.disabled:
+            body = {
+                "username": user.email,
+                "password": user.password.get_secret_value(),  # type: ignore
+            }
+            response = await client.post(
+                "/auth/login",
+                data=body,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+            print(response.json())
+            result.update({user.fullname: response.json()["access_token"]})
+    return result
+
+
+@pytest.fixture
 async def admin_auth_header(admin_jwt: str) -> Dict:
     return {"Authorization": f"Bearer {admin_jwt}"}
 
 
 @pytest.fixture
-async def create_users(
-    client: AsyncClient,
-    admin_auth_header: dict,
-    admin_expected: dict,
-):
-    pass
+async def other_users_auth_header(other_users_jwt: dict) -> Dict:
+    result = {}
+    for name, jwt in other_users_jwt.items():
+        result.update({name: {"Authorization": f"Bearer {jwt}"}})
+
+    return result
+
+
+@pytest.fixture
+def post_content() -> schemas.CreatePostInDB:
+    text = "test post1"
+    return schemas.CreatePostInDB(
+        title=text,
+        description=f"description text",
+        content="Example content",
+        estimated=11,
+        tags=["test", text],
+    )
+
+
+@pytest.fixture
+async def post_id(
+    get_session: AsyncSession,
+    post_content: schemas.CreatePostInDB,
+    create_admin: None,
+) -> str:
+    text = "test post1"
+    post_id = await crud.post.create_post(get_session, user_id=1, obj_in=post_content)
+    return post_id
