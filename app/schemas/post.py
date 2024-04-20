@@ -2,11 +2,11 @@ from datetime import datetime, timezone
 from typing import List, Optional, Union
 import uuid
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 
-def gen_post_id() -> str:
-    return uuid.uuid4().hex[0:10]
+def gen_post_id(title: str) -> str:
+    return uuid.uuid3(uuid.NAMESPACE_URL, title).hex[0:10]
 
 
 def gen_post_date() -> str:
@@ -39,9 +39,17 @@ class PostToDB(BaseModel):
 
 
 class CreatePostInDB(PostToDB):
-    post_id: str = Field(default_factory=gen_post_id)
+    post_id: str | None = Field(default=None, validate_default=True)
     created: str = Field(default_factory=gen_post_date)
     modified: None = None
+
+    @field_validator("post_id", mode="after")
+    @classmethod
+    def make_post_id(cls, v: str | None, info: ValidationInfo) -> str:
+        if v:
+            return v
+        title = info.data["title"]
+        return gen_post_id(title)
 
 
 class UpdatePostInDB(PostToDB):

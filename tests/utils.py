@@ -45,8 +45,23 @@ class Manage:
 
 
 class ManagePost(Manage):
-    async def create(self):
-        pass
+    async def create(self, post: schemas.CreatePostRequest):
+        url = "/post/"
+        body = post.model_dump()
+
+        return await self.client.post(
+            url,
+            json=body,
+            headers=self.headers,
+        )
+
+    async def delete(self, post_id: str):
+        url = f"/post/{post_id}"
+
+        return await self.client.delete(
+            url,
+            headers=self.headers,
+        )
 
 
 class ManageUser(Manage):
