@@ -17,18 +17,17 @@ class TestUser:
         self,
         prepare_db: None,
         create_admin: None,
-        get_session: AsyncSession,
+        db_session: AsyncSession,
         user_data_expected: utils.Users,
     ):
-        session = get_session
-        wrong_data = ["foo@barbaz.com", 111]
-        for test in wrong_data:
+        invalid_data = ["foo@barbaz.com", 111]
+        for wrong_user in invalid_data:
             with pytest.raises(exceptions.NotFound):
-                await get_user_helper(session, test)
+                await get_user_helper(db_session, wrong_user)
 
         admin_data = user_data_expected["admin"]
-        check_by_id = await get_user_helper(session, admin_data.id)
-        check_by_email = await get_user_helper(session, admin_data.email)
+        check_by_id = await get_user_helper(db_session, admin_data.id)
+        check_by_email = await get_user_helper(db_session, admin_data.email)
 
         exclude = {"hashed_password", "role_id"}
         assert (
@@ -40,41 +39,31 @@ class TestUser:
     async def test_admin_login(
         self,
         client: AsyncClient,
-        admin_data: schemas.UserToDB,
+        user_data_expected: utils.Users,
         create_admin: None,
     ) -> None:
+        admin_data = user_data_expected["admin"]
         body = {
             "username": admin_data.email,
-            "password": admin_data.password.get_secret_value(),  # type: ignore
+            "password": admin_data.password,
         }
         manager = utils.ManageUser(client=client)
         manager.set_body(body)
-        requrest = await manager.login()
-        assert requrest.status_code == status.HTTP_200_OK
-        assert requrest.json()["access_token"]
+        request = await manager.login()
+        assert request.status_code == status.HTTP_200_OK
+        assert schemas.TokenResponse(**request.json())
 
-        body["password"] = "invalid-root-password"
-        manager.set_body(body)
-        requrest = await manager.login()
-        assert requrest.status_code == status.HTTP_401_UNAUTHORIZED
+        invalid_data = {
+            "password": "invalid-password",
+            "username": "invalid-admin@foobar.baz",
+        }
+        for k, v in invalid_data.items():
+            invalid_body = body.copy()
+            invalid_body[k] = v
+            request = await manager.login(invalid_body)
+            assert request.status_code == status.HTTP_401_UNAUTHORIZED
 
     async def test_admin_me(
-        self,
-        client: AsyncClient,
-        admin_auth_header: dict,
-        admin_expected: dict,
-    ) -> None:
-        requrest = await client.get(
-            "/user/me",
-            headers=admin_auth_header,
-        )
-        assert requrest.status_code == status.HTTP_200_OK
-        assert admin_expected == requrest.json()
-
-        requrest = await client.get("/user/me")
-        assert requrest.status_code == status.HTTP_401_UNAUTHORIZED
-
-    async def test_create_user(
         self,
         client: AsyncClient,
         admin_auth_header: dict,
@@ -82,25 +71,39 @@ class TestUser:
         user_data_expected: utils.Users,
     ) -> None:
         manager = utils.ManageUser(client=client)
-        manager.set_header(admin_auth_header)
+        request = await manager.get("me")
+        assert request.status_code == status.HTTP_401_UNAUTHORIZED
+
+        manager.set_headers(admin_auth_header)
+        request = await manager.get("me")
+        assert request.status_code == status.HTTP_200_OK
+        assert schemas.UserResponse(
+            **admin_expected,
+        ) == schemas.UserResponse(**request.json())
+
+    async def test_create_user(
+        self,
+        client: AsyncClient,
+        admin_auth_header: dict,
+        user_data_expected: utils.Users,
+    ) -> None:
+        manager = utils.ManageUser(client=client)
+        manager.set_headers(admin_auth_header)
 
         # Create all users
         for name, data in user_data_expected.users.items():
             # main admin already created
             if name == "admin":
-                CHECK_STATUS = status.HTTP_401_UNAUTHORIZED
-                requrest = await client.get("/user/")
+                continue
             else:
-                CHECK_STATUS = status.HTTP_200_OK
                 body = data.model_dump(exclude={"id"})
-                requrest = await manager.post(body=body)
+                request = await manager.post(body=body)
 
-            assert requrest.status_code == CHECK_STATUS
-            if not name == "admin":
-                assert data.model_dump(exclude={"password"}) == requrest.json()
+            assert request.status_code == status.HTTP_200_OK
+            assert data.model_dump(exclude={"password"}) == request.json()
 
-            created_user_email = await manager.get(user=data.email)
-            created_user_id = await manager.get(user=data.id)
+            created_user_email = await manager.get(data.email)
+            created_user_id = await manager.get(data.id)
             assert created_user_email.status_code == status.HTTP_200_OK
             assert created_user_id.status_code == status.HTTP_200_OK
             assert (
@@ -114,8 +117,8 @@ class TestUser:
         assert len(get_users.json()) == len(user_data_expected.users)
 
         expected_data = [
-            v.model_dump(exclude={"password"})
-            for v in user_data_expected.users.values()
+            user.model_dump(exclude={"password"})
+            for user in user_data_expected.users.values()
         ]
         assert expected_data == get_users.json()
 
@@ -147,7 +150,7 @@ class TestUser:
         user = user_data_expected["admin_user"]
 
         root_manager = utils.ManageUser(client=client)
-        root_manager.set_header(admin_auth_header)
+        root_manager.set_headers(admin_auth_header)
         user_manager = utils.ManageUser(client=client)
 
         for disabled in [True, False]:
@@ -161,10 +164,9 @@ class TestUser:
         create_other_users: None,
     ):
         root_admin = user_data_expected["admin"]
-        user_admin = user_data_expected["admin_user"]
 
         root_manager = utils.ManageUser(client=client)
-        root_manager.set_header(admin_auth_header)
+        root_manager.set_headers(admin_auth_header)
         new_root_pass = "new-root-pass"
 
         root_manager.set_body(
@@ -176,10 +178,6 @@ class TestUser:
         request = await root_manager.me_change_pass()
         assert request.status_code == status.HTTP_200_OK
 
-        body = {
-            "username": root_admin.email,
-            "password": new_root_pass,
-        }
         manager = utils.ManageUser(client=client)
         manager.set_body(
             {

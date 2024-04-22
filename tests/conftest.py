@@ -1,4 +1,11 @@
-from typing import Any, AsyncGenerator, Dict, Literal
+from typing import AsyncGenerator, Dict, Literal
+
+import pytest
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 from app import crud, schemas
 from app.core.config import get_settings
@@ -6,13 +13,6 @@ from app.db.meta import Base
 from app.db.session import get_db_session
 from app.main import app as fastapi_app
 from tests import utils
-from httpx import AsyncClient, ASGITransport
-import pytest
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
-
 
 settings = get_settings("test")
 fastapi_uri = f"{settings.SERVER_HOST}:{settings.SERVER_PORT}{settings.API_URL}"
@@ -42,7 +42,7 @@ def anyio_backend():
 
 
 @pytest.fixture
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
     async with session_local() as session:
         yield session
 
@@ -61,11 +61,12 @@ async def prepare_db():
 
 
 @pytest.fixture
-async def client(prepare_db: None) -> AsyncGenerator[AsyncClient, None]:
+async def client(
+    prepare_db: None,
+) -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(
-        transport=ASGITransport(app=fastapi_app),
+        transport=ASGITransport(app=fastapi_app),  # pyright: ignore
         base_url=fastapi_uri,
-        # headers={"Content-Type": "application/json"},
     ) as client:
         yield client
         await engine.dispose()
@@ -129,7 +130,7 @@ def admin_expected(
 
 @pytest.fixture
 def admin_data(
-    user_data_expected: dict[str, utils.User],
+    user_data_expected: utils.Users,
 ) -> schemas.UserToDB:
     admin = user_data_expected.get("admin")
     if not admin:
@@ -141,12 +142,14 @@ def admin_data(
 
 
 @pytest.fixture
-def other_users_data(user_data_expected: utils.Users) -> list[schemas.UserToDB]:
+def other_users_data(
+    user_data_expected: utils.Users,
+) -> list[schemas.UserToDB]:
     result = []
     for name, data in user_data_expected.users.items():
         if not name == "admin":
             user = schemas.UserToDB(
-                **data.model_dump(exclude={"id"}),
+                **data.model_dump(exclude={"id", "jwt"}),
                 role_id=utils.map_role_name_to_id(data.role_name),
             )
             result.append(user)
@@ -155,19 +158,19 @@ def other_users_data(user_data_expected: utils.Users) -> list[schemas.UserToDB]:
 
 @pytest.fixture
 async def create_admin(
-    get_session: AsyncSession,
+    db_session: AsyncSession,
     admin_data: schemas.UserToDB,
 ) -> None:
-    await crud.user.create(get_session, obj_in=admin_data)
+    await crud.user.create(db_session, obj_in=admin_data)
 
 
 @pytest.fixture
 async def create_other_users(
-    get_session: AsyncSession,
+    db_session: AsyncSession,
     other_users_data: list[schemas.UserToDB],
 ) -> None:
     for user in other_users_data:
-        await crud.user.create(get_session, obj_in=user)
+        await crud.user.create(db_session, obj_in=user)
 
 
 @pytest.fixture
@@ -238,11 +241,11 @@ def post_content() -> schemas.CreatePostInDB:
 
 
 @pytest.fixture
-async def post_id(
-    get_session: AsyncSession,
+async def create_post_crud(
+    db_session: AsyncSession,
     post_content: schemas.CreatePostInDB,
     create_admin: None,
 ) -> str:
     text = "test post1"
-    post_id = await crud.post.create_post(get_session, user_id=1, obj_in=post_content)
+    post_id = await crud.post.create_post(db_session, user_id=1, obj_in=post_content)
     return post_id
