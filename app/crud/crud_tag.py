@@ -1,12 +1,13 @@
 from typing import List, Optional
 
-from app import schemas
-from app.crud.crud_base import CRUDBase
-from app.models import Tag
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import func
+
+from app import schemas
+from app.crud.crud_base import CRUDBase
+from app.models import Tag
 
 
 class CRUDPost(CRUDBase[Tag]):

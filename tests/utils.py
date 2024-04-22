@@ -1,8 +1,10 @@
-from pydantic import Field
-from app import schemas
 from dataclasses import dataclass
-from httpx import AsyncClient, Response
 from typing import Literal
+
+from httpx import AsyncClient, Response
+from pydantic import Field
+
+from app import schemas
 
 
 def map_role_name_to_id(role_name: Literal["admin", "user"]) -> int:

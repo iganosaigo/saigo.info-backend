@@ -1,11 +1,12 @@
-from typing import Any, cast, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
+
+from sqlalchemy import delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import func
 
 from app import schemas
 from app.crud.crud_base import CRUDBase
 from app.models import Account, Post
-from sqlalchemy import delete, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.expression import func
 
 
 class CRUDPost(CRUDBase[Post]):

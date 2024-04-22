@@ -1,13 +1,14 @@
-from app import crud, schemas
-from app.core import exceptions
-from app.core.config import settings
-from app.core.security import verify_access_token
-from app.db.session import get_db_session
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose.exceptions import ExpiredSignatureError, JWTError
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app import crud, schemas
+from app.core import exceptions
+from app.core.config import settings
+from app.core.security import verify_access_token
+from app.db.session import get_db_session
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_URL}/auth/login",

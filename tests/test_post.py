@@ -1,10 +1,9 @@
-from fastapi import status
 import pytest
+from fastapi import status
+from httpx import AsyncClient
 
 from app import schemas
-from httpx import AsyncClient
 from tests import utils
-
 
 pytestmark = pytest.mark.anyio
 

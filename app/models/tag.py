@@ -1,5 +1,6 @@
-from app.db.meta import Base
 from sqlalchemy import Column, Text
+
+from app.db.meta import Base
 
 
 class Tag(Base):

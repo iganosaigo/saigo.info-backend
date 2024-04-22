@@ -1,7 +1,7 @@
-from functools import lru_cache
 import os
 import secrets
-from typing import cast, Optional
+from functools import lru_cache
+from typing import Optional, cast
 
 from pydantic import (
     BaseModel,
@@ -13,7 +13,6 @@ from pydantic import (
 )
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 

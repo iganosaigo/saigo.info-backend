@@ -2,17 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from app.db.meta import Base
-from sqlalchemy import (
-    Boolean,
-    Column,
-    ForeignKey,
-    Integer,
-    SmallInteger,
-    String,
-    Text,
-)
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, SmallInteger, String, Text
 from sqlalchemy.orm import relationship
+
+from app.db.meta import Base
 
 if TYPE_CHECKING:
     from .post import Post

@@ -1,12 +1,12 @@
 from typing import Any
 
-from app import crud, schemas
-from app.core import exceptions, security
-from app.db.session import get_db_session as db_session
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import crud, schemas
+from app.core import exceptions, security
+from app.db.session import get_db_session as db_session
 
 router = APIRouter()
 

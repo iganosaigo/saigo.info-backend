@@ -4,7 +4,6 @@ from typing import List, Optional, Union
 from pydantic import EmailStr
 from typing_extensions import TypedDict
 
-
 # class TPostData(TypedDict):
 #     title: str
 #     content: str

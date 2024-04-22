@@ -1,9 +1,10 @@
 __version__ = "0.0.1"
 
-from app.api import routes
-from app.core.config import settings
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+
+from app.api import routes
+from app.core.config import settings
 
 
 def create_app() -> FastAPI:

@@ -1,15 +1,15 @@
 from typing import Any, Dict, List, Union
 
+from fastapi import APIRouter, Depends, Response, status
+from pydantic import EmailStr
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app import crud, schemas
 from app.api import deps
 from app.core import exceptions
 from app.core.security import get_password_hash, verify_password
 from app.db.session import get_db_session as db_session
 from app.schemas import types
-from fastapi import APIRouter, Depends, Response, status
-from pydantic import EmailStr
-from sqlalchemy.ext.asyncio import AsyncSession
-
 
 router = APIRouter()
 

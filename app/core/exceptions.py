@@ -1,7 +1,8 @@
 from typing import Any, Dict, Optional
 
-from app.core.config import settings
 from fastapi import HTTPException, status
+
+from app.core.config import settings
 
 
 class CustomHTTPException(HTTPException):

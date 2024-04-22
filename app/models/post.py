@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
-from app.db.meta import Base
 from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
+
+from app.db.meta import Base
 
 if TYPE_CHECKING:
     from .user import Account

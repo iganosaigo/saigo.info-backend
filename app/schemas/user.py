@@ -1,9 +1,8 @@
 from typing import Optional
 
-from app.core.security import get_password_hash
 from pydantic import (
-    ConfigDict,
     BaseModel,
+    ConfigDict,
     EmailStr,
     Field,
     SecretStr,
@@ -11,8 +10,9 @@ from pydantic import (
     field_validator,
 )
 
-from . import types
+from app.core.security import get_password_hash
 
+from . import types
 
 value_error = "{} must be less than {} characters"
 EMAIL_MAX_LENGTH = 100

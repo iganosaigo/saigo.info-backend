@@ -1,13 +1,13 @@
 import math
 from typing import Any, Dict, List, Literal, Optional
 
+from fastapi import APIRouter, Depends, Query, Response, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app import crud, schemas
 from app.api import deps
 from app.core import exceptions
 from app.db.session import get_db_session as db_session
-from fastapi import APIRouter, Depends, Query, Response, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 
 router = APIRouter()
 

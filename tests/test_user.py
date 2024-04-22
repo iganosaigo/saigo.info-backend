@@ -1,11 +1,11 @@
 import pytest
+from fastapi import status
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import schemas
 from app.api.endpoints.user import get_user_helper
 from app.core import exceptions
-from fastapi import status
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 from tests import utils
 
 pytestmark = pytest.mark.anyio

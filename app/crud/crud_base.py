@@ -1,10 +1,10 @@
 from typing import Any, Dict, Generic, Optional, Type, TypeVar
 
-from app.db.meta import Base
 from pydantic import BaseModel
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.meta import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 
