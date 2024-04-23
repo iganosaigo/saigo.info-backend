@@ -9,7 +9,7 @@ from app.api import deps
 from app.core import exceptions
 from app.core.security import get_password_hash, verify_password
 from app.db.session import get_db_session as db_session
-from app.schemas import types
+from app.schemas import spec_types
 
 router = APIRouter()
 
@@ -18,7 +18,7 @@ async def get_user_helper(
     db: AsyncSession,
     user: Union[int, EmailStr],
 ) -> schemas.UserFromDB:
-    crud_params: types.TUserGetOpts = {}
+    crud_params: spec_types.TUserGetOpts = {}
 
     if isinstance(user, int):
         crud_params["id"] = user

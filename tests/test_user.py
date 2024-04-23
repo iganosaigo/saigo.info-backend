@@ -173,7 +173,7 @@ class TestUser:
             {
                 "old_password": root_admin.password,
                 "new_password": new_root_pass,
-            }
+            },
         )
         request = await root_manager.me_change_pass()
         assert request.status_code == status.HTTP_200_OK
@@ -183,7 +183,7 @@ class TestUser:
             {
                 "username": root_admin.email,
                 "password": new_root_pass,
-            }
+            },
         )
 
         requrest = await manager.login()

@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Literal
 
 from httpx import AsyncClient, Response
-from pydantic import Field
 
 from app import schemas
 
@@ -59,7 +58,7 @@ class Manage:
                     "headers": {
                         "Content-Type": "application/x-www-form-urlencoded",
                     },
-                }
+                },
             )
         elif method in ["put", "post"]:
             params.update({"json": self._body})

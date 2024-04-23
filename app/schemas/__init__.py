@@ -11,7 +11,7 @@ from .post import (
     UpdatePostRequest,
     UpdatePostResponse,
 )
-from .token import TokenPayload, TokenResponse
+from .tokens import TokenPayload, TokenResponse
 from .user import (
     ChangeMePasswordRequest,
     ChangeUserPasswordRequest,

@@ -1,6 +1,5 @@
 from typing import Any, Dict, Generic, Optional, Type, TypeVar
 
-from pydantic import BaseModel
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

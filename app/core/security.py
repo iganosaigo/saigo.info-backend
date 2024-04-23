@@ -10,11 +10,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def create_access_token(subject: str) -> str:
+    time_now = datetime.now(timezone.utc)
+    expire = time_now + timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
+
     jwt_claims = {
         "iss": str(settings.SERVER_HOST),
         "iat": datetime.now(timezone.utc),
-        "exp": datetime.now(timezone.utc)
-        + timedelta(minutes=settings.JWT_EXPIRE_MINUTES),
+        "exp": expire,
         "sub": subject,
     }
 

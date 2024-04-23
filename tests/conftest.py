@@ -99,7 +99,7 @@ def user_data_expected() -> utils.Users:
             id=3,
             name="user",
             role="user",
-        )
+        ),
     }
     disabled_user = {
         "disabled_user": create_user(
@@ -107,7 +107,7 @@ def user_data_expected() -> utils.Users:
             name="disabled-user",
             role="user",
             disabled=True,
-        )
+        ),
     }
     all_users = utils.Users(
         users={
@@ -115,7 +115,7 @@ def user_data_expected() -> utils.Users:
             **admin_user,
             **readonly_user,
             **disabled_user,
-        }
+        },
     )
     return all_users
 
@@ -209,7 +209,6 @@ async def other_users_jwt(
                 data=body,
                 headers={"Content-Type": "application/x-www-form-urlencoded"},
             )
-            print(response.json())
             result.update({user.fullname: response.json()["access_token"]})
     return result
 
@@ -233,7 +232,7 @@ def post_content() -> schemas.CreatePostInDB:
     text = "test post1"
     return schemas.CreatePostInDB(
         title=text,
-        description=f"description text",
+        description="description text",
         content="Example content",
         estimated=11,
         tags=["test", text],
@@ -246,6 +245,5 @@ async def create_post_crud(
     post_content: schemas.CreatePostInDB,
     create_admin: None,
 ) -> str:
-    text = "test post1"
     post_id = await crud.post.create_post(db_session, user_id=1, obj_in=post_content)
     return post_id

@@ -70,7 +70,7 @@ class TestPost:
                 manager.set_headers()
 
                 request = await manager.create(
-                    self.create_post_template(f"NOTPERMITTED")
+                    self.create_post_template("NOTPERMITTED"),
                 )
                 assert request.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -121,5 +121,5 @@ class TestPost:
 
         excluded = {"modified"}
         assert post_modif.model_dump(exclude=excluded) == post_latest.model_dump(
-            exclude=excluded
+            exclude=excluded,
         )

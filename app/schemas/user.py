@@ -12,8 +12,6 @@ from pydantic import (
 
 from app.core.security import get_password_hash
 
-from . import types
-
 value_error = "{} must be less than {} characters"
 EMAIL_MAX_LENGTH = 100
 

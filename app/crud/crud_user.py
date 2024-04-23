@@ -1,10 +1,10 @@
-from typing import Any, Dict, List, Optional, cast
+from typing import List, Optional, cast
 
 from sqlalchemy import exists, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import schemas
-from app.core.security import get_password_hash, verify_password
+from app.core.security import verify_password
 from app.crud.crud_base import CRUDBase
 from app.models import Account, Role
 
