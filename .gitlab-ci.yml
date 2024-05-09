@@ -1,0 +1,4 @@
+include:
+  - project: "saigohome/pipelines"
+    ref: main
+    file: "/templates/saigo.info-backend.yaml"
