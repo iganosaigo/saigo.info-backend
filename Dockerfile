@@ -23,6 +23,10 @@ RUN set -x && \
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir "poetry==$POETRY_VERSION"
 
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    curl=7.88.1-* && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY alembic.ini run.py ./
 COPY alembic alembic
 
